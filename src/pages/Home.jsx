@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import '../styles/home.css';
 
 const Home = () => {
@@ -36,12 +37,12 @@ const Home = () => {
           Your interactive platform for learning cybersecurity fundamentals
         </p>
         <div className="cta-buttons">
-          <a href="/learn" className="button primary">
+          <Link to="/learn" className="button primary">
             Start Learning
-          </a>
-          <a href="/games" className="button secondary">
+          </Link>
+          <Link to="/games" className="button secondary">
             Play Games
-          </a>
+          </Link>
         </div>
       </section>
 
@@ -113,17 +114,17 @@ const Home = () => {
           <div className="feature-card">
             <h3>Interactive Learning</h3>
             <p>Explore comprehensive cybersecurity topics through hands-on exercises and real-world examples.</p>
-            <a href="/learn" className="learn-more">Start Learning →</a>
+            <Link to="/learn" className="learn-more">Start Learning →</Link>
           </div>
           <div className="feature-card">
             <h3>Security Games</h3>
             <p>Test your knowledge with interactive cybersecurity games designed to reinforce key concepts.</p>
-            <a href="/games" className="learn-more">Play Games →</a>
+            <Link to="/games" className="learn-more">Play Games →</Link>
           </div>
           <div className="feature-card">
             <h3>Live Chat</h3>
             <p>Connect with other security enthusiasts and share knowledge in our global chat room.</p>
-            <a href="/chat" className="learn-more">Join Chat →</a>
+            <Link to="/chat" className="learn-more">Join Chat →</Link>
           </div>
         </div>
       </section>
@@ -180,12 +181,12 @@ const Home = () => {
         <h2>Ready to Begin?</h2>
         <p>Start your cybersecurity journey today with our structured learning paths.</p>
         <div className="cta-buttons">
-          <a href="/learn" className="button primary">
+          <Link to="/learn" className="button primary">
             Explore Courses
-          </a>
-          <a href="/chat" className="button secondary">
+          </Link>
+          <Link to="/chat" className="button secondary">
             Join Community
-          </a>
+          </Link>
         </div>
       </section>
     </div>

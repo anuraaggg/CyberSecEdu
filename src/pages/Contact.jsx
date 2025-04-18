@@ -3,7 +3,7 @@ import emailjs from '@emailjs/browser';
 import '../styles/contact.css';
 
 // Initialize EmailJS
-emailjs.init("to4NpHiRTQbxSIYgQ");
+emailjs.init(import.meta.env.VITE_EMAILJS_PUBLIC_KEY);
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -30,8 +30,8 @@ const Contact = () => {
 
     try {
       await emailjs.send(
-        'service_f1pd3da',
-        'template_2bfozyd',
+        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
         {
           name: formData.name,
           email: formData.email,
