@@ -1,0 +1,434 @@
+.games-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.games-container h1 {
+  text-align: center;
+  color: var(--text-color);
+  margin-bottom: 2rem;
+  font-size: 2.5rem;
+}
+
+.game-selector {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.game-button {
+  padding: 1rem 1.5rem;
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--text-color);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  min-width: 200px;
+  position: relative;
+}
+
+.game-button:hover {
+  background: rgba(0, 0, 0, 0.4);
+  transform: translateY(-5px);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.game-button.active {
+  background: rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.score-badge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: var(--success-color);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.game-content {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 2rem;
+  transition: all 0.3s ease;
+}
+
+.game-content:hover {
+  transform: translateY(-5px);
+  background: rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.game-content h2 {
+  color: var(--text-color);
+  margin-bottom: 1rem;
+  font-size: 1.8rem;
+}
+
+.game-description {
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+.game-quiz {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.game-quiz h3 {
+  color: var(--text-color);
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+}
+
+.game-quiz p {
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+}
+
+.options {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.option-button {
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.option-button:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.5);
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.option-button.correct {
+  background: rgba(0, 255, 0, 0.1);
+  border-color: rgba(0, 255, 0, 0.3);
+  color: #4CAF50;
+}
+
+.option-button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.password-game {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.password-game input {
+  width: 100%;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-color);
+  font-size: 1rem;
+}
+
+.password-game input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.password-game button.submit-button {
+  width: 100%;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  margin-top: 1rem;
+}
+
+.password-game button.submit-button:hover {
+  background: rgba(0, 0, 0, 0.5) !important;
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.password-game button.submit-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.strength-meter {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.strength-bar {
+  height: 100%;
+  background: var(--success-color);
+  transition: width 0.3s ease;
+}
+
+.submit-button {
+  width: 100%;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  margin-top: 1rem;
+}
+
+.submit-button:hover {
+  background: rgba(0, 0, 0, 0.5);
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.submit-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.puzzle-game {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.puzzle-steps {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.puzzle-step {
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: grab;
+  transition: all 0.3s ease;
+}
+
+.puzzle-step:hover {
+  background: rgba(0, 0, 0, 0.5);
+  transform: translateY(-2px);
+}
+
+.puzzle-step.dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+}
+
+.puzzle-step.correct {
+  background: rgba(0, 255, 0, 0.1);
+  border-color: rgba(0, 255, 0, 0.3);
+  color: #4CAF50;
+}
+
+.puzzle-step.incorrect {
+  background: rgba(255, 0, 0, 0.1);
+  border-color: rgba(255, 0, 0, 0.3);
+  color: #f44336;
+}
+
+.puzzle-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.complete-button {
+  padding: 1rem 2rem;
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.complete-button:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.5);
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.complete-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.score-display {
+  text-align: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  color: var(--text-color);
+}
+
+.score-display p {
+  margin-top: 0.5rem;
+  color: var(--text-secondary);
+}
+
+.leaderboard {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.leaderboard:hover {
+  transform: translateY(-5px);
+  background: rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.leaderboard h2 {
+  color: var(--text-color);
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+  text-align: center;
+}
+
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.leaderboard-table th,
+.leaderboard-table td {
+  padding: 1rem;
+  text-align: left;
+  color: var(--text-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.leaderboard-table th {
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.leaderboard-table tr:last-child td {
+  border-bottom: none;
+}
+
+.leaderboard-table .highlight {
+  background: var(--hover-bg);
+}
+
+.retry-button {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.retry-button:hover {
+  background: rgba(0, 0, 0, 0.5);
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.game-complete {
+  margin-top: 2rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.game-complete p {
+  color: var(--text-color);
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.password-feedback {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.password-feedback p {
+  color: var(--text-color);
+  margin: 0 0 0.5rem 0;
+  font-weight: 500;
+}
+
+.password-feedback ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  color: var(--text-secondary);
+}
+
+.password-feedback li {
+  margin: 0.25rem 0;
+}
+
+@media (max-width: 768px) {
+  .games-container {
+    padding: 1rem;
+  }
+
+  .game-button {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .game-content {
+    padding: 1.5rem;
+  }
+
+  .options {
+    grid-template-columns: 1fr;
+  }
+} 
