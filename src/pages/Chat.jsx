@@ -12,10 +12,32 @@ const generateRandomUsername = () => {
   return `${adjective}${noun}${randomNumber}`;
 };
 
+// Helper function to validate username format
+const isValidUsername = (username) => {
+  if (!username) return false;
+  
+  // Check if it follows our adjective+noun+number format
+  // This is a simple check - it should contain at least one letter and one number
+  return /[A-Za-z]/.test(username) && /[0-9]/.test(username) && username.length > 5;
+};
+
 const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
-  const [username] = useState(generateRandomUsername()); // Username is now fixed for the session
+  const [username] = useState(() => {
+    // Check if we already have a username in localStorage and validate it
+    const savedUsername = localStorage.getItem('chatUsername');
+    if (savedUsername && isValidUsername(savedUsername)) {
+      console.log('Using saved username:', savedUsername);
+      return savedUsername;
+    }
+    
+    // Generate a new username and save it to localStorage
+    const newUsername = generateRandomUsername();
+    console.log('Generated new username:', newUsername);
+    localStorage.setItem('chatUsername', newUsername);
+    return newUsername;
+  });
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
@@ -189,4 +211,4 @@ const Chat = () => {
   );
 };
 
-export default Chat; 
+export default Chat;

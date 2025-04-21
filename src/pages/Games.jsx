@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { ref, onValue, push, set, serverTimestamp, get } from 'firebase/database';
+import { database } from '../config/firebase';
 import '../styles/games.css';
 
 const generateRandomUsername = () => {
@@ -10,89 +12,155 @@ const generateRandomUsername = () => {
   return `${adjective}${noun}${randomNumber}`;
 };
 
+// Helper function to validate username format
+const isValidUsername = (username) => {
+  if (!username) return false;
+  
+  // Check if it follows our adjective+noun+number format
+  // This is a simple check - it should contain at least one letter and one number
+  return /[A-Za-z]/.test(username) && /[0-9]/.test(username) && username.length > 5;
+};
+
 const Games = () => {
   const [activeGame, setActiveGame] = useState('phishing');
   const [gameState, setGameState] = useState({
     phishing: { score: 0, completed: false },
     password: { score: 0, completed: false },
-    puzzle: { score: 0, completed: false }
+    puzzle: { score: 0, completed: false },
   });
-  const [leaderboards, setLeaderboards] = useState(() => {
-    const saved = localStorage.getItem('gameLeaderboards');
-    if (saved) {
-      return JSON.parse(saved);
-    }
-    return {
-      phishing: [],
-      password: [],
-      puzzle: []
-    };
-  });
-  const [username, setUsername] = useState(() => {
-    // First try to get username from chat
-    const chatUsername = localStorage.getItem('chatUsername');
-    if (chatUsername) {
-      localStorage.setItem('gameUsername', chatUsername);
-      return chatUsername;
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [username] = useState(() => {
+    // Check if we already have a username in localStorage and validate it
+    const savedUsername = localStorage.getItem('chatUsername');
+    if (savedUsername && isValidUsername(savedUsername)) {
+      console.log('Using saved username:', savedUsername);
+      return savedUsername;
     }
     
-    // Then try to get existing game username
-    const gameUsername = localStorage.getItem('gameUsername');
-    if (gameUsername) {
-      if (gameUsername.startsWith('Player')) {
-        const newUsername = generateRandomUsername();
-        localStorage.setItem('gameUsername', newUsername);
-        return newUsername;
-      }
-      return gameUsername;
-    }
-
+    // Generate a new username and save it to localStorage
     const newUsername = generateRandomUsername();
-    localStorage.setItem('gameUsername', newUsername);
+    console.log('Generated new username:', newUsername);
+    localStorage.setItem('chatUsername', newUsername);
     return newUsername;
   });
+  const reconnectTimeoutRef = useRef(null);
+  const unsubscribeRef = useRef(null);
 
-  // Load scores from localStorage
-  useEffect(() => {
-    const savedScores = localStorage.getItem('gameScores');
-    if (savedScores) {
-      setGameState(JSON.parse(savedScores));
+  // Initialize Firebase connection and leaderboard listener
+  const initializeFirebase = async () => {
+    try {
+      console.log('Initializing Firebase leaderboard connection...');
+      setIsLoading(true);
+      setError(null);
+
+      // Use a single gameLeaderboard node in Firebase
+      const leaderboardRef = ref(database, 'gameLeaderboard');
+      
+      // Check if leaderboard node exists
+      try {
+        const snapshot = await get(leaderboardRef);
+        if (!snapshot.exists()) {
+          await set(leaderboardRef, {});
+        }
+      } catch (error) {
+        console.error('Error checking leaderboard node:', error);
+      }
+
+      // Set up real-time listener
+      const unsub = onValue(leaderboardRef, (snapshot) => {
+        console.log('Received leaderboard data');
+        setIsLoading(false);
+        setError(null);
+
+        const data = snapshot.val();
+        if (data) {
+          // Process and filter for current active game
+          const allEntries = Object.entries(data)
+            .map(([key, value]) => ({
+              ...value,
+              id: key
+            }));
+          
+          // Filter for current active game and sort by score
+          const gameEntries = allEntries
+            .filter(entry => entry.game === activeGame)
+            .sort((a, b) => b.score - a.score);
+          
+          setLeaderboard(gameEntries);
+        } else {
+          setLeaderboard([]);
+        }
+      }, (error) => {
+        console.error('Database error:', error);
+        setError('Connection lost. Attempting to reconnect...');
+        scheduleReconnect();
+      });
+
+      // Store the unsubscribe function
+      unsubscribeRef.current = unsub;
+    } catch (error) {
+      console.error('Setup error:', error);
+      setError('Failed to connect to leaderboard. Attempting to reconnect...');
+      scheduleReconnect();
     }
+  };
+
+  const scheduleReconnect = () => {
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+    }
+    reconnectTimeoutRef.current = setTimeout(() => {
+      console.log('Attempting to reconnect to leaderboard...');
+      initializeFirebase();
+    }, 5000);
+  };
+
+  // Initialize Firebase on component mount
+  useEffect(() => {
+    initializeFirebase();
+    
+    return () => {
+      if (unsubscribeRef.current) {
+        unsubscribeRef.current();
+      }
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+    };
   }, []);
 
-  // Save scores to localStorage and update leaderboard
+  // Update leaderboard when active game changes
   useEffect(() => {
-    localStorage.setItem('gameScores', JSON.stringify(gameState));
-    
-    // Update leaderboards for the active game
-    if (gameState[activeGame].completed && gameState[activeGame].score > 0) {
-      setLeaderboards(prev => {
-        const newLeaderboards = { ...prev };
-        const currentLeaderboard = [...(prev[activeGame] || [])];
-        
-        // Remove existing entry for this user
-        const filteredLeaderboard = currentLeaderboard.filter(
-          entry => entry.username !== username
-        );
-        
-        // Add new entry
-        filteredLeaderboard.push({
-          username,
-          score: gameState[activeGame].score,
-          lastUpdated: new Date().toISOString()
-        });
-        
-        // Sort and limit to top 10
-        newLeaderboards[activeGame] = filteredLeaderboard
-          .sort((a, b) => b.score - a.score)
-          .slice(0, 10);
-        
-        // Save to localStorage
-        localStorage.setItem('gameLeaderboards', JSON.stringify(newLeaderboards));
-        return newLeaderboards;
-      });
+    // Unsubscribe from previous listener
+    if (unsubscribeRef.current) {
+      unsubscribeRef.current();
     }
-  }, [gameState, username, activeGame]);
+    initializeFirebase();
+  }, [activeGame]);
+
+  // Function to submit score to Firebase
+  const submitScore = async (game, score) => {
+    try {
+      const leaderboardRef = ref(database, 'gameLeaderboard');
+      const newScoreRef = push(leaderboardRef);
+      
+      const scoreData = {
+        id: newScoreRef.key,
+        username: username,
+        game: game,
+        score: score,
+        timestamp: serverTimestamp()
+      };
+
+      await set(newScoreRef, scoreData);
+      console.log('Score submitted successfully');
+    } catch (error) {
+      console.error('Error submitting score:', error);
+      setError('Failed to save score. Please try again.');
+    }
+  };
 
   const games = {
     phishing: {
@@ -100,48 +168,61 @@ const Games = () => {
       description: 'Test your ability to identify phishing attempts in emails and messages.',
       component: <PhishingGame 
         onComplete={(newScore) => {
-          setGameState(prev => ({
+          console.log('Phishing game completed with score:', newScore);
+          submitScore('phishing', newScore);
+          setGameState((prev) => ({
             ...prev,
-            phishing: { score: newScore, completed: true }
+            phishing: { score: newScore, completed: true },
           }));
         }}
-      />
+      />,
     },
     password: {
       title: 'Password Strength Game',
       description: 'Learn what makes a strong password and test your password creation skills.',
       component: <PasswordGame 
         onComplete={(newScore) => {
-          setGameState(prev => ({
+          console.log('Password game completed with score:', newScore);
+          submitScore('password', newScore);
+          setGameState((prev) => ({
             ...prev,
-            password: { score: newScore, completed: true }
+            password: { score: newScore, completed: true },
           }));
         }}
-      />
+      />,
     },
     puzzle: {
       title: 'Cyber Safety Puzzle',
       description: 'Solve puzzles based on real-world cybersecurity scenarios.',
       component: <PuzzleGame 
         onComplete={(newScore) => {
-          setGameState(prev => ({
+          console.log('Puzzle game completed with score:', newScore);
+          submitScore('puzzle', newScore);
+          setGameState((prev) => ({
             ...prev,
-            puzzle: { score: newScore, completed: true }
+            puzzle: { score: newScore, completed: true },
           }));
         }}
-      />
-    }
+      />,
+    },
   };
 
-  const totalScore = Object.values(gameState).reduce(
-    (sum, game) => sum + game.score,
-    0
-  );
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp) return '';
+    const date = new Date(timestamp);
+    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { 
+      hour: '2-digit', 
+      minute: '2-digit'
+    });
+  };
 
   return (
     <div className="games-container">
       <h1>Cybersecurity Games</h1>
-      
+      <div className="username-display">
+        Your username: <span className="username-highlight">{username}</span>
+      </div>
+
       <div className="game-selector">
         {Object.keys(games).map((game) => (
           <button
@@ -164,29 +245,35 @@ const Games = () => {
       </div>
 
       <div className="leaderboard">
-        <h2>Game Leaderboard: {games[activeGame].title}</h2>
+        <h2>Leaderboard: {games[activeGame].title}</h2>
+        {error && <div className="error-message">{error}</div>}
+        
         <table className="leaderboard-table">
           <thead>
             <tr>
               <th>Rank</th>
               <th>Player</th>
               <th>Score</th>
-              <th>Last Updated</th>
+              <th>Date</th>
             </tr>
           </thead>
           <tbody>
-            {leaderboards[activeGame]?.map((entry, index) => (
-              <tr 
-                key={entry.username}
-                className={entry.username === username ? 'highlight' : ''}
-              >
-                <td>{index + 1}</td>
-                <td>{entry.username}</td>
-                <td>{entry.score}</td>
-                <td>{new Date(entry.lastUpdated).toLocaleDateString()}</td>
+            {isLoading ? (
+              <tr>
+                <td colSpan="4" style={{ textAlign: 'center' }}>
+                  Loading leaderboard...
+                </td>
               </tr>
-            ))}
-            {(!leaderboards[activeGame] || leaderboards[activeGame].length === 0) && (
+            ) : leaderboard.length > 0 ? (
+              leaderboard.slice(0, 10).map((entry, index) => (
+                <tr key={entry.id} className={entry.username === username ? 'highlight' : ''}>
+                  <td>{index + 1}</td>
+                  <td>{entry.username}</td>
+                  <td>{entry.score}</td>
+                  <td>{formatTimestamp(entry.timestamp)}</td>
+                </tr>
+              ))
+            ) : (
               <tr>
                 <td colSpan="4" style={{ textAlign: 'center' }}>
                   No scores yet. Be the first to play!
@@ -516,4 +603,4 @@ const PuzzleGame = ({ onComplete }) => {
   );
 };
 
-export default Games; 
+export default Games;
